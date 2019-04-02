@@ -18,7 +18,7 @@ define('BASEPATH', __DIR__);
 /**
  * Require helper functions script
  */
-require BASEPATH . '/vendor/autoload.php';
+
 require BASEPATH . '/system/helpers.php';
 
 /**
