@@ -1,55 +1,62 @@
 <?php
+/**
+ * INDEX FILE / ROUTING SCRIPT
+ * ----
+ * This script handles all the HTTP requests and passes all 
+ * variables and data to page scripts using the include function.
+ * 
+ * By default all objects and classes defined in system/libraries/
+ * are loaded automatically.
+ * 
+ */
 
-$name = "Ces";
+/**
+ * Define BASEPATH to ensure that this script is loaded first.
+ */
+define('BASEPATH', __DIR__);
 
-echo "THE OWNER IS " . $name . "</br>";
-echo "hello" . "</br> <hr>";
+/**
+ * Require helper functions script
+ */
+require BASEPATH . '/vendor/autoload.php';
+require BASEPATH . '/system/helpers.php';
 
-$a = 1;
-$b = 2;
-$c = 1 + 2;
-echo $c . "<hr>";
+/**
+ * Define AUTOLOAD method for system classes
+ */
+spl_autoload_register(function($className) 
+{
+	$className = str_replace("\\", DIRECTORY_SEPARATOR, $className);
+	$parts = explode(DIRECTORY_SEPARATOR, $className);
+	$namespace = implode(DIRECTORY_SEPARATOR, array_slice($parts, 0, -1)); 
+	$className = array_slice($parts, -1)[0];
 
-// === equivalent
+	$paths = [
+		BASEPATH . '/system/libraries/',
+		BASEPATH . '/' . strtolower($namespace) . '/'
+	];
 
-$d = 3;
-$e = 4;
+	foreach ($paths as $path)
+	{
+		if (file_exists($path . "{$className}.php"))
+		{
+            include_once $path . "{$className}.php";
+            break;
+        }
+	}
+});
 
-if ($d == $e) {
-    echo "EQUAL!";}
-else { echo "NOT EQUAL!";}
+/**
+ * Start sessions
+ */
+if (!isset($_SESSION)) session_start();
 
-echo "<hr>";
-
-
-$arr = ['a', 'b', 'c', 'd', 'e'];
-// zero-based array
-echo $arr [2] . "</br>";
-echo $arr [4] . "</br>";
-
-// key-based array may pangalan each values
-$arr = ["first" => "s",
-        "second" => "k"];
-
-echo $arr ["first"];
-echo "<hr>";
-
-//for loop
-
-$arr1 = ['kei', 'chii', 'yutti', 'yuya'];
-$arr = ["first" => "a",
-        "second" => "b"];
-foreach ($arr1 as $name) {
-    echo $name . "</br>";
-    if ($name == "yuya") {
-        echo "Found him!";
-        continue;
-    }
-}
-
-$first = "Ces";
-$last = "B";
-
-function join_names($first, $last = "Cruz"){
-    echo $first." ".$last;
-}
+/**
+ * Route Handler
+ * ----
+ * Split the given url by '/' and find the specified file
+ * inside the app/pages/ folder
+ */
+$uri = preg_replace('/^' . preg_quote(parse_url(base_url())['path'], '/') . '/', '', $_SERVER['REQUEST_URI']);
+$segments = parse_url($uri);
+include('app/pages/' . (empty($segments['path']) ? 'index' : $segments['path']) . '.php');
