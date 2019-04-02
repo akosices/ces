@@ -6,5 +6,13 @@ defined('BASEPATH') or die('Direct script access not allowed');
 
 <?php
 
-var_dump
+$db = new DB;
+$query = $db->prepare("SELECT * FROM posts");
+if ($query->execute()) {
+    echo 'SUCCESS';
+} else {
+    echo 'FAIL'
+}
+
+?>
 
